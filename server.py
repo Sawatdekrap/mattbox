@@ -63,8 +63,9 @@ class Server:
     async def run(self):
         serve_task = websockets.serve(self.connection_handler, self.host, self.port)
 
-        await asyncio.wait([
-            self.game.cycle_stages(),
+        done, pending = await asyncio.wait([
             self.game.start(),
             serve_task
         ])
+        for task in pending:
+            task.cancel()
