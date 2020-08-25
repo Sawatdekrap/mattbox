@@ -40,11 +40,18 @@ class Server:
             await self.game.post_register_user(user)
             logger.info(f"New user: {user.uuid}")
 
-        read_task = asyncio.create_task(self.read_handler(websocket, path, user))
-        write_task = asyncio.create_task(self.write_handler(websocket, path, user))
+        read_task = asyncio.create_task(
+            self.read_handler(websocket, path, user)
+        )
+        write_task = asyncio.create_task(
+            self.write_handler(websocket, path, user)
+        )
 
-        # Run both tasks until one exits, then tear down 
-        done, pending = await asyncio.wait([read_task, write_task], return_when=asyncio.FIRST_COMPLETED)
+        # Run both tasks until one exits, then tear down
+        done, pending = await asyncio.wait(
+            [read_task, write_task],
+            return_when=asyncio.FIRST_COMPLETED
+        )
         for task in pending:
             task.cancel()
 
@@ -61,7 +68,9 @@ class Server:
             logger.info(f"User left: {user.uuid}")
 
     async def run(self):
-        serve_task = websockets.serve(self.connection_handler, self.host, self.port)
+        serve_task = websockets.serve(
+            self.connection_handler, self.host, self.port
+        )
 
         done, pending = await asyncio.wait([
             self.game.start(),

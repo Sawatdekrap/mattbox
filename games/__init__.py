@@ -153,7 +153,9 @@ class BaseGame:
 
             # Create a post-task if something needs to happen
             if handle_obj is not None:
-                q_post(self.current_stage.post_handle_event(event, self, handle_obj))
+                q_post(self.current_stage.post_handle_event(
+                    event, self, handle_obj
+                ))
 
             # Cycle stage if we need to
             if self.current_stage.is_complete():
