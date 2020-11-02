@@ -16,5 +16,8 @@ ws.on('message', data => {
 });
 
 const interval = setInterval(() => {
-  if (ws.OPEN) ws.send('DATA!');
+  if (ws.OPEN) {
+    console.log('Sending data...');
+    ws.send('DATA!');
+  }
 }, 1000);

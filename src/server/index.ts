@@ -1,68 +1,85 @@
-import { textSpanIntersectsWith, updateImportEqualsDeclaration } from 'typescript';
 import * as WebSocket from 'ws';
-import { Messages } from '../common/constants';
-
-interface GameItf {
-  capacity: number;
-};
 
 type UUID = string;
 
-interface UserProps {
-  uuid: UUID;
+export abstract class BaseMessage {
+  skip: boolean;
+  constructor(data: WebSocket.Data) {this.skip = false;}
+}
+
+interface BaseUserProps {
   sock: WebSocket;
 };
 
-class User {
-  uuid: UUID;
+export class BaseUser {
   sock: WebSocket;
-  game: GameItf;
+  uuid: UUID;
+  connected: boolean;
 
-  constructor(props: UserProps, game: GameItf) {
-    this.uuid = props.uuid;
+  constructor(props: BaseUserProps) {
     this.sock = props.sock;
-    this.game = game;
-
-    this.registerEvents();
-  };
-
-  private onMessage(message: string){
-    //
-  };
-
-  registerEvents() {
-    this.sock.on('message', this.onMessage);
+    this.uuid = (Math.random() * 99999999).toString();
+    this.connected = true;
   };
 };
 
-// TODO move users to game?
-class Server {
-  users: Record<UUID, User>;
-  game: GameItf;
-  serverProps: WebSocket.ServerOptions;
+interface BaseGameProps {
+  capacity: number;
+}
 
-  constructor(game: GameItf, serverProps: WebSocket.ServerOptions) {
-    this.users = {};
-    this.game = game;
-    this.serverProps = serverProps;
-  };
+export abstract class BaseGame<U extends BaseUser, M extends BaseMessage> {
+  capacity: number;
+  users: Record<UUID, U>;
 
-  private onConnection(sock: WebSocket) {
-    const user = new User({
-      uuid: (Math.random() * 20).toString(),
-      sock: sock,
-    }, this.game);
+  constructor(props: BaseGameProps) {
+   this.capacity = props.capacity;
+   this.users = {};
+  }
 
-    if (Object.keys(this.users).length < this.game.capacity) {
-      this.users[user.uuid] = user;
-      sock.on('close', () => {
-        delete this.users[user.uuid];
-      });
+  start(serverProps: WebSocket.ServerOptions) {
+    const wss = new WebSocket.Server(serverProps);
+    wss.on('connection', this.initNewConnection);
+  }
+
+  abstract decodeMessage(data: WebSocket.Data): M;
+  abstract createNewUser(sock: WebSocket): U;
+
+  initNewConnection(sock: WebSocket) {
+    const user = this.createNewUser(sock);
+    if (Object.keys(this.users).length >= this.capacity){
+      return;
     }
-  };
+    this.registerEvents(user, sock);
+    this.preNewUser(user);
+    this.users[user.uuid] = user;
+    this.postNewUser(user);
+  }
 
-  run() {
-    const wss = new WebSocket.Server(this.serverProps);
-    wss.on('connection', this.onConnection);
-  };
-};
+  private registerEvents(user: U, sock: WebSocket) {
+    sock.on('message', data => {
+      const message = this.decodeMessage(data);
+      const cleanMessage = this.preNewMessage(user, message);
+      if (!cleanMessage.skip) {
+        this.newMessage(user, cleanMessage);
+        this.postNewMessage(user, cleanMessage);
+      }
+    });
+
+    sock.on('close', (code, reason) => {
+      this.preRemoveUser(user);
+      user.connected = false;
+      this.postRemoveUser(user);
+    })
+  }
+
+  // User-overridable functions
+  preNewUser(user: U) {}
+  postNewUser(user: U) {}
+
+  preNewMessage(user: U, message: M): M {return message;}
+  postNewMessage(user: U, message: M) {}
+  newMessage(user: U, message: M) {}
+
+  preRemoveUser(user: U) {}
+  postRemoveUser(user: U) {}
+}
