@@ -1,13 +1,14 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 module.exports = {
   entry: {
-    default: "./src/chat/index.tsx",
+    chat_server: "./src/chat/index.ts"
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx|tsx)$/,
+        test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
@@ -27,4 +28,10 @@ module.exports = {
       filename: "./index.html",
     }),
   ],
+  resolve: {
+    alias: {
+      common: path.resolve(__dirname, "src/common/"),
+    },
+    extensions: [".ts", ".tsx"],
+  }
 };

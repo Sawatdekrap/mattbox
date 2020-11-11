@@ -1,5 +1,5 @@
 import * as WebSocket from 'ws';
-import { BaseGame, BaseUser, BaseMessage } from '../server';
+import { BaseGame, BaseUser, BaseMessage } from 'common/server';
 
 class Message extends BaseMessage {
   text: string;
@@ -21,8 +21,12 @@ class Game extends BaseGame<User, Message> {
   postNewUser(user: User) {
     console.log(`User (${user.uuid}) has connected`)
   }
-  postNewMessage(user: User, message: Message) {
+  preNewMessage(user: User, message: Message) {
     console.log(`Message from ${user.uuid}: ${message.text}`)
+    return message;
+  }
+  newMessage(user: User, message: Message) {
+    Object.values(this.users).forEach(user => user.sock.send(message.text));
   }
   postRemoveUser(user: User) {
     console.log(`User ${user.uuid} has disconnected`);

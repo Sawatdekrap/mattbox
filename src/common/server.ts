@@ -38,7 +38,8 @@ export abstract class BaseGame<U extends BaseUser, M extends BaseMessage> {
 
   start(serverProps: WebSocket.ServerOptions) {
     const wss = new WebSocket.Server(serverProps);
-    wss.on('connection', this.initNewConnection);
+    // NOTE the following doesn't work: wss.on('connection', this.initNewConnection);
+    wss.on('connection', (sock: WebSocket) => this.initNewConnection(sock));
   }
 
   abstract decodeMessage(data: WebSocket.Data): M;
