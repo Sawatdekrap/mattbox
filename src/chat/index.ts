@@ -1,5 +1,5 @@
-import * as WebSocket from 'ws';
-import { BaseGame, BaseUser, BaseMessage } from 'common/server';
+import * as WebSocket from "ws";
+import { BaseGame, BaseUser, BaseMessage } from "common/server";
 
 class Message extends BaseMessage {
   text: string;

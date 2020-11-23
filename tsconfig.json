@@ -1,25 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es5",                          
-    "module": "commonjs",                    
-    "lib": ["es6", "DOM"],                     
-    "allowJs": true,
-    "outDir": "build",                          
-    "rootDir": "src",
-    "strict": true,         
-    "noImplicitAny": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
     "jsx": "react",
+    "sourceMap": true,
+    "typeRoots": ["node_modules/@types"],
     "baseUrl": "./",
     "paths": {
-      "common/*": ["src/common/*"]
+      "common/*": ["./src/common/*"]
     },
   },
   "exclude": [
+    "dist",
     "node_modules",
     "webpack.server.config.js",
-    "webpack.client.config.js",
-    "dist"
+    "webpack.client.config.js"
   ]
 }

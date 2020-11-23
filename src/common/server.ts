@@ -1,4 +1,4 @@
-import * as WebSocket from 'ws';
+import * as WebSocket from "ws";
 
 type UUID = string;
 
@@ -38,7 +38,7 @@ export abstract class BaseGame<U extends BaseUser, M extends BaseMessage> {
 
   start(serverProps: WebSocket.ServerOptions) {
     const wss = new WebSocket.Server(serverProps);
-    // NOTE the following doesn't work: wss.on('connection', this.initNewConnection);
+    // NOTE cannot just pass initNewConnection as handler function
     wss.on('connection', (sock: WebSocket) => this.initNewConnection(sock));
   }
 
