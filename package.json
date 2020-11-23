@@ -1,42 +1,18 @@
 {
-  "name": "static",
+  "name": "test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development",
-    "build-server": "webpack --mode development --config ./webpack.server.config.js",
-    "build-client": "webpack --mode development --config ./webpack.client.config.js",
-    "format": "prettier --write ."
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.12.1",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/preset-react": "^7.12.1",
-    "@babel/preset-typescript": "^7.12.1",
-    "babel-loader": "^8.1.0",
-    "html-loader": "^1.3.0",
-    "html-webpack-plugin": "^4.4.1",
-    "prettier": "2.1.2",
-    "ts-loader": "^8.0.11",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
-  },
   "dependencies": {
-    "@types/jest": "^26.0.15",
-    "@types/node": "^14.11.11",
-    "@types/react": "^16.9.53",
-    "@types/react-dom": "^16.9.8",
-    "@types/ws": "^7.2.8",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "typescript": "^4.0.3",
-    "ws": "^7.3.1"
+    "ws": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^7.4.0",
+    "typescript": "^4.1.2"
   }
 }
