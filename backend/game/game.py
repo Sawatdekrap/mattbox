@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 
-from ..user import User
-from ..action import Action
+from user import User
+from action import Action
 
 
 class Game(ABC):
@@ -22,7 +22,8 @@ class Game(ABC):
 
         if matching_user_index is not None:
             self.users.pop(matching_user_index)
+            # This index is incorrect
 
     @abstractmethod
-    def on_action(self, action: Action) -> None:
+    def on_action(self, action: Action) -> List[Action]:
         ...
