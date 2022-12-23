@@ -7,6 +7,7 @@ from models.game import Game, NewGameParams
 from models.update import Update, UpdateDestination, UpdateType
 import stores.game as game_store
 import stores.update as update_store
+import stores.player as player_store
 from connection_manager import Connection, ConnectionManager
 
 
@@ -35,22 +36,21 @@ async def new_game(new_game_params: NewGameParams, background_tasks: BackgroundT
 
 async def game_loop(game_id: str) -> None:
     while True:
-        print("Tick...")
         game = game_store.get_game_by_id(game_id)
         incoming_updates = update_store.get_updates(game_id)
 
         # TODO do something with updates
         for update in incoming_updates:
-            print(f"New update: {update.data}")
             outgoing_update = Update(
                 destination=UpdateDestination.CLIENT,
                 type=UpdateType.COMPONENT,
                 data=f"You said {update.data}",
             )
-            connection_id = list(connection_manager.connections.keys())[0]
-            await update_store.push_update_for_connection(
-                game.id, connection_id, outgoing_update
-            )
+            players = player_store.get_players_for_game(game.id)
+            for player in players:
+                await update_store.push_update_for_connection(
+                    game.id, player.connection_id, outgoing_update
+                )
 
         await aio.sleep(game.tick)
 
@@ -74,7 +74,9 @@ async def join_game(ws: WebSocket, game_id: str, background_tasks: BackgroundTas
         raise WebSocketException(status.WS_1000_NORMAL_CLOSURE)
 
     connection = await connection_manager.connect(ws, game.id)
-    done, pending = await aio.wait(
+    player_store.add_player_for_connection(game.id, connection.id)
+
+    _done, pending = await aio.wait(
         [
             aio.create_task(handle_incoming(connection)),
             aio.create_task(handle_outgoing(connection)),
@@ -84,5 +86,5 @@ async def join_game(ws: WebSocket, game_id: str, background_tasks: BackgroundTas
     for task in pending:
         task.cancel()
 
-    # TODO disconnect from game
+    player_store.remove_player_for_connection(game.id, connection.id)
     connection_manager.remove(connection.id)
