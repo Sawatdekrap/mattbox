@@ -1,5 +1,5 @@
 import asyncio as aio
-from typing import List
+from typing import List, Optional
 
 from fastapi import FastAPI, WebSocket, BackgroundTasks, WebSocketException, status
 
@@ -68,13 +68,13 @@ async def handle_outgoing(connection: Connection) -> None:
 
 
 @app.websocket("/games/{game_id}")
-async def join_game(ws: WebSocket, game_id: str, background_tasks: BackgroundTasks):
+async def join_game(ws: WebSocket, game_id: str, alias: Optional[str] = None):
     game = game_store.get_game_by_id(game_id)
     if game is None:
         raise WebSocketException(status.WS_1000_NORMAL_CLOSURE)
 
     connection = await connection_manager.connect(ws, game.id)
-    player_store.add_player_for_connection(game.id, connection.id)
+    player_store.add_player_for_connection(game.id, connection.id, alias)
 
     _done, pending = await aio.wait(
         [
