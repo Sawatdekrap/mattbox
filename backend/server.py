@@ -8,6 +8,7 @@ from models.update import Update, UpdateDestination, UpdateType
 import stores.game as game_store
 import stores.update as update_store
 import stores.player as player_store
+from use_cases.game import add_player_to_game
 from connection_manager import Connection, ConnectionManager
 
 
@@ -74,7 +75,7 @@ async def join_game(ws: WebSocket, game_id: str, alias: Optional[str] = None):
         raise WebSocketException(status.WS_1000_NORMAL_CLOSURE)
 
     connection = await connection_manager.connect(ws, game.id)
-    player_store.add_player_for_connection(game.id, connection.id, alias)
+    await add_player_to_game(game.id, connection.id, alias)
 
     _done, pending = await aio.wait(
         [

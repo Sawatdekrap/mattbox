@@ -11,6 +11,7 @@ class UpdateDestination(Enum):
 
 class UpdateType(Enum):
     COMPONENT = "component"
+    LAYOUT = "layout"
 
 
 class Update(BaseModel):

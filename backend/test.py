@@ -27,6 +27,9 @@ async def main():
 
     connect_url = get_url("ws", "games", game_id, alias="Test%20User")
     async with websockets.connect(connect_url) as ws:
+        layout = await ws.recv()
+        print(f"Layout: '{layout}'")
+
         while True:
             message = input("< ").strip()
 
