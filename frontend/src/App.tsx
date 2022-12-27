@@ -1,26 +1,13 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import GameList from "./pages/GameList";
+import Game from "./pages/Game";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [gameId, setGameId] = useState<string | null>(null);
+
+  if (gameId === null) return <GameList setGameId={setGameId}></GameList>;
+
+  return <Game gameId={gameId} />;
 }
 
 export default App;
