@@ -2,6 +2,7 @@ import asyncio as aio
 from typing import List, Optional
 
 from fastapi import FastAPI, WebSocket, BackgroundTasks, WebSocketException, status
+from fastapi.middleware.cors import CORSMiddleware
 
 from models.game import Game, NewGameParams
 from models.update import Update, UpdateDestination, UpdateType
@@ -13,6 +14,14 @@ from connection_manager import Connection, ConnectionManager
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 connection_manager = ConnectionManager()
 
 
