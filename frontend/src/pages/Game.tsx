@@ -8,11 +8,13 @@ interface GameProps {
 }
 
 const Game = ({ gameId }: GameProps) => {
-  const [layout, setLayout] = useState<LayoutItf>();
+  const [layout, setLayout] = useState<LayoutItf>({ components: [] });
 
   const onComponentUpdate = () => {};
 
-  const onLayoutUpdate = () => {};
+  const onLayoutUpdate = (newLayout: LayoutItf) => {
+    setLayout(newLayout);
+  };
 
   const { sendComponentUpdate } = useWebsocket({
     gameId,

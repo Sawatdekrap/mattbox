@@ -1,10 +1,10 @@
 import React, { useRef, useEffect } from "react";
-import { ComponentItf } from "./interfaces";
+import { LayoutItf, ComponentItf } from "./interfaces";
 
 interface UseWebsocketProps {
   gameId: string;
   onComponentUpdate: (data: string) => void;
-  onLayoutUpdate: (components: ComponentItf[]) => void;
+  onLayoutUpdate: (layout: LayoutItf) => void;
 }
 
 const useWebsocket = ({
@@ -15,33 +15,33 @@ const useWebsocket = ({
   const ws = useRef<WebSocket>();
 
   useEffect(() => {
-    if (ws.current) return;
+    if (!ws.current) {
+      const url = `ws://localhost:8000/games/${gameId}`;
+      ws.current = new WebSocket(url);
 
-    const url = `ws://localhost:8000/games/${gameId}`;
-    ws.current = new WebSocket(url);
+      ws.current.addEventListener("open", () => {
+        console.log("Connection open");
+      });
+      ws.current.addEventListener("close", () => {
+        console.log("Connection closed");
+      });
+      ws.current.addEventListener("message", (e) => {
+        // TODO properly serialize/deserialize
+        const dataString: string = e.data.toString();
+        console.log(`Recieved: ${dataString}`);
 
-    ws.current.addEventListener("open", () => {
-      console.log("Connection open");
-    });
-    ws.current.addEventListener("close", () => {
-      console.log("Connection closed");
-    });
-    ws.current.addEventListener("message", (e) => {
-      // TODO properly serialize/deserialize
-      const dataString: string = e.data.toString();
-      console.log(`Recieved: ${dataString}`);
-
-      if (dataString.startsWith("[")) {
-        const components = JSON.parse(dataString) as ComponentItf[];
-        onLayoutUpdate(components);
-      } else {
-        onComponentUpdate(dataString);
-      }
-    });
+        if (dataString.startsWith("[")) {
+          const components = JSON.parse(dataString) as ComponentItf[];
+          const newLayout: LayoutItf = { components: components };
+          onLayoutUpdate(newLayout);
+        } else {
+          onComponentUpdate(dataString);
+        }
+      });
+    }
 
     return () => {
-      console.log("Exiting useWebsocket render");
-      ws.current && ws.current.close();
+      ws?.current?.readyState === WebSocket.OPEN && ws.current.close();
     };
   }, [gameId]);
 
