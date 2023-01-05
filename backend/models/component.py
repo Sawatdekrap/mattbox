@@ -1,10 +1,10 @@
 from typing import List
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel
 
 
-class ComponentType(Enum):
+class ComponentType(StrEnum):
     CHAT = "chat"
 
 

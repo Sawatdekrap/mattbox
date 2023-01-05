@@ -5,7 +5,7 @@ from fastapi import FastAPI, WebSocket, BackgroundTasks, WebSocketException, sta
 from fastapi.middleware.cors import CORSMiddleware
 
 from models.game import Game, NewGameParams
-from models.update import Update, UpdateDestination, UpdateType
+from models.update import Update, UpdateDestination, UpdateType, ComponentUpdate
 import stores.game as game_store
 import stores.update as update_store
 import stores.player as player_store
@@ -51,9 +51,10 @@ async def game_loop(game_id: str) -> None:
 
         # TODO do something with updates
         for update in incoming_updates:
-            outgoing_update = Update(
+            outgoing_update = ComponentUpdate(
                 destination=UpdateDestination.CLIENT,
                 type=UpdateType.COMPONENT,
+                component_id="chat",
                 data=f"You said {update.data}",
             )
             players = player_store.get_players_for_game(game.id)
@@ -67,14 +68,14 @@ async def game_loop(game_id: str) -> None:
 
 async def handle_incoming(connection: Connection) -> None:
     while True:
-        data = await connection.ws.receive_text()
+        data = await connection.ws.receive_json()
         await update_store.push_update_for_game(connection.game_id, connection.id, data)
 
 
 async def handle_outgoing(connection: Connection) -> None:
     while True:
         data = await update_store.get_data(connection.game_id, connection.id)
-        await connection.ws.send_text(data)
+        await connection.ws.send_json(data)
 
 
 @app.websocket("/games/{game_id}")

@@ -2,7 +2,7 @@ from asyncio import Queue
 from collections import deque, defaultdict
 from typing import Dict, List
 
-from models.update import Update, UpdateDestination, UpdateType
+from models.update import Update, UpdateDestination, UpdateType, ComponentUpdate
 
 
 UpdateQueue = Queue[Update]
@@ -13,14 +13,10 @@ INCOMING_UPDATES: GameConnectionQueues = defaultdict(lambda: defaultdict(Queue))
 OUTGOING_UPDATES: GameConnectionQueues = defaultdict(lambda: defaultdict(Queue))
 
 
-async def push_update_for_game(game_id: str, connection_id: str, data: str) -> None:
+async def push_update_for_game(game_id: str, connection_id: str, data: dict) -> None:
     game_connection_queues = INCOMING_UPDATES[game_id]
     connection_queue = game_connection_queues[connection_id]
-    update = Update(
-        destination=UpdateDestination.SERVER,
-        type=UpdateType.COMPONENT,
-        data=data,
-    )
+    update = ComponentUpdate(**data)
 
     await connection_queue.put(update)
 
@@ -47,11 +43,12 @@ def get_updates(game_id: str) -> List[Update]:
     return all_updates
 
 
-async def get_data(game_id: str, connection_id: str) -> str:
+async def get_data(game_id: str, connection_id: str) -> dict:
     game_connection_queues = OUTGOING_UPDATES[game_id]
     connection_queue = game_connection_queues[connection_id]
 
     update = await connection_queue.get()
-    data = update.data
+    print(update)
+    data = update.json()
 
     return data

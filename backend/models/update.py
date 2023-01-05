@@ -1,20 +1,32 @@
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel
 
+from models.layout import Layout
 
-class UpdateDestination(Enum):
+
+class UpdateDestination(StrEnum):
     CLIENT = "client"
     SERVER = "server"
 
 
-class UpdateType(Enum):
+class UpdateType(StrEnum):
     COMPONENT = "component"
     LAYOUT = "layout"
 
 
 class Update(BaseModel):
-    destination: UpdateDestination
     type: UpdateType
-    data: str
+    destination: UpdateDestination
+
+
+class LayoutUpdate(Update):
+    type = UpdateType.LAYOUT
+    layout: Layout
+
+
+class ComponentUpdate(Update):
+    type = UpdateType.COMPONENT
+    component_id: str
+    data: Any

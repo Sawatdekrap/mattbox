@@ -1,22 +1,16 @@
-import React, { useRef, useEffect } from "react";
-import { LayoutItf, ComponentItf } from "./interfaces";
+import React, { useState, useRef, useEffect } from "react";
 
 interface UseWebsocketProps {
-  gameId: string;
-  onComponentUpdate: (data: string) => void;
-  onLayoutUpdate: (layout: LayoutItf) => void;
+  url: string;
 }
 
-const useWebsocket = ({
-  gameId,
-  onComponentUpdate,
-  onLayoutUpdate,
-}: UseWebsocketProps) => {
+const useWebsocket = ({ url }: UseWebsocketProps) => {
+  const [lastMessage, setLastMessage] = useState("");
+
   const ws = useRef<WebSocket>();
 
   useEffect(() => {
     if (!ws.current) {
-      const url = `ws://localhost:8000/games/${gameId}`;
       ws.current = new WebSocket(url);
 
       ws.current.addEventListener("open", () => {
@@ -26,30 +20,24 @@ const useWebsocket = ({
         console.log("Connection closed");
       });
       ws.current.addEventListener("message", (e) => {
-        // TODO properly serialize/deserialize
-        const dataString: string = e.data.toString();
-        console.log(`Recieved: ${dataString}`);
-
-        if (dataString.startsWith("[")) {
-          const components = JSON.parse(dataString) as ComponentItf[];
-          const newLayout: LayoutItf = { components: components };
-          onLayoutUpdate(newLayout);
-        } else {
-          onComponentUpdate(dataString);
-        }
+        setLastMessage(e.data.toString());
       });
     }
 
     return () => {
-      ws?.current?.readyState === WebSocket.OPEN && ws.current.close();
+      ws.current &&
+        ws.current.readyState === WebSocket.OPEN &&
+        ws.current.close();
     };
-  }, [gameId]);
+  }, [url]);
 
-  const sendComponentUpdate = (data: string) => {
-    ws.current && ws.current.send(data);
+  const sendMessage = (message: string) => {
+    ws.current && ws.current.send(message);
   };
 
-  return { sendComponentUpdate };
+  const isConnected = ws.current?.readyState === WebSocket.OPEN;
+
+  return { sendMessage, lastMessage, isConnected };
 };
 
 export default useWebsocket;
