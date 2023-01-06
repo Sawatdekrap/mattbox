@@ -1,11 +1,8 @@
 from typing import List
-from enum import StrEnum
 
 from pydantic import BaseModel
 
-
-class ComponentType(StrEnum):
-    CHAT = "chat"
+from constants.component import ComponentType
 
 
 class Component(BaseModel):

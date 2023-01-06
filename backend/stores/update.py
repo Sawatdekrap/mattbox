@@ -1,8 +1,8 @@
 from asyncio import Queue
-from collections import deque, defaultdict
+from collections import defaultdict
 from typing import Dict, List
 
-from models.update import Update, UpdateDestination, UpdateType, ComponentUpdate
+from models.update import Update, ComponentUpdate
 
 
 UpdateQueue = Queue[Update]

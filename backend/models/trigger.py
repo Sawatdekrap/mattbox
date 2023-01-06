@@ -1,8 +1,6 @@
-from enum import Enum
-
 from pydantic import BaseModel
 
-from models.update import UpdateType
+from constants.update import UpdateType
 
 
 class Trigger(BaseModel):

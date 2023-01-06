@@ -1,19 +1,9 @@
-from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel
 
+from constants.update import UpdateType, UpdateDestination
 from models.layout import Layout
-
-
-class UpdateDestination(StrEnum):
-    CLIENT = "client"
-    SERVER = "server"
-
-
-class UpdateType(StrEnum):
-    COMPONENT = "component"
-    LAYOUT = "layout"
 
 
 class Update(BaseModel):

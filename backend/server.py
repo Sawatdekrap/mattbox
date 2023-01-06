@@ -4,8 +4,9 @@ from typing import List, Optional
 from fastapi import FastAPI, WebSocket, BackgroundTasks, WebSocketException, status
 from fastapi.middleware.cors import CORSMiddleware
 
+from constants.update import UpdateDestination, UpdateType
 from models.game import Game, NewGameParams
-from models.update import Update, UpdateDestination, UpdateType, ComponentUpdate
+from models.update import ComponentUpdate
 import stores.game as game_store
 import stores.update as update_store
 import stores.player as player_store

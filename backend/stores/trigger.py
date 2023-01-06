@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List
 
-from models.update import UpdateType
+from constants.update import UpdateType
 from models.trigger import Trigger
 
 

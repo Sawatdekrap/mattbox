@@ -1,9 +1,11 @@
 from typing import Optional
 
+from constants.component import ComponentType
+from constants.update import UpdateDestination, UpdateType
 from models.player import Player
 from models.layout import Layout
-from models.component import ChatComponent, ComponentType
-from models.update import UpdateDestination, UpdateType, LayoutUpdate
+from models.component import ChatComponent
+from models.update import LayoutUpdate
 import stores.player as player_store
 import stores.layout as layout_store
 import stores.update as update_store
