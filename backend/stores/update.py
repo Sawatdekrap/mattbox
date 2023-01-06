@@ -2,7 +2,7 @@ from asyncio import Queue
 from collections import defaultdict
 from typing import Dict, List
 
-from models.update import Update, ComponentUpdate
+from models.update import Update, UpdateComponentUpdate
 
 
 UpdateQueue = Queue[Update]
@@ -16,7 +16,7 @@ OUTGOING_UPDATES: GameConnectionQueues = defaultdict(lambda: defaultdict(Queue))
 async def push_update_for_game(game_id: str, connection_id: str, data: dict) -> None:
     game_connection_queues = INCOMING_UPDATES[game_id]
     connection_queue = game_connection_queues[connection_id]
-    update = ComponentUpdate(**data)
+    update = UpdateComponentUpdate(**data)
 
     await connection_queue.put(update)
 

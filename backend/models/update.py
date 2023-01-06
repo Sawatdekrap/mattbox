@@ -1,22 +1,23 @@
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel
 
 from constants.update import UpdateType, UpdateDestination
-from models.layout import Layout
+from models.component import Component
 
 
 class Update(BaseModel):
-    type: UpdateType
     destination: UpdateDestination
+    type: UpdateType
 
 
-class LayoutUpdate(Update):
-    type = UpdateType.LAYOUT
-    layout: Layout
+class SetComponentsUpdate(Update):
+    destination = UpdateDestination.CLIENT
+    type = UpdateType.SET_COMPONENTS
+    components: List[Component]
 
 
-class ComponentUpdate(Update):
-    type = UpdateType.COMPONENT
+class UpdateComponentUpdate(Update):
+    type = UpdateType.UPDATE_COMPONENT
     component_id: str
     data: Any

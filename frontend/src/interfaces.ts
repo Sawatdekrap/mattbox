@@ -14,20 +14,16 @@ export interface ChatComponentItf extends ComponentItf {
   lines: string[];
 }
 
-export interface LayoutItf {
-  components: Record<string, ComponentItf>;
-}
-
 export interface UpdateItf {
   destination: UpdateDestination;
   type: UpdateType;
 }
 
-export interface ComponentUpdateItf extends UpdateItf {
+export interface UpdateComponentUpdateItf extends UpdateItf {
   componentId: string;
   data: any;
 }
 
-export interface LayoutUpdateItf extends UpdateItf {
-  layout: LayoutItf;
+export interface SetComponentsUpdateItf extends UpdateItf {
+  components: ComponentItf[];
 }

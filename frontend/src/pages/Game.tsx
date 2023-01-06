@@ -5,9 +5,9 @@ import Chat from "../components/Chat";
 import { ComponentType, UpdateDestination, UpdateType } from "../constants";
 import {
   ChatComponentItf,
-  LayoutItf,
-  ComponentUpdateItf,
-  LayoutUpdateItf,
+  ComponentItf,
+  SetComponentsUpdateItf,
+  UpdateComponentUpdateItf,
 } from "../interfaces";
 import useWebsocket from "../useWebsocket";
 import { toSnakeKeys } from "../utilities";
@@ -17,23 +17,29 @@ interface GameProps {
 }
 
 const Game = ({ gameId }: GameProps) => {
-  const [layout, setLayout] = useState<LayoutItf>({ components: {} });
+  const [components, setComponents] = useState<ComponentItf[]>([]);
 
   const onComponentUpdate = (componentId: string, data: any) => {
-    const component = layout.components[componentId];
-    if (component?.type === ComponentType.CHAT) {
+    const componentIdx = components.findIndex((c) => c.id === componentId);
+    if (componentIdx === -1) {
+      console.error(
+        `Unable to update component with id '${componentId}', doesn't exist`
+      );
+      return;
+    }
+
+    const component = components[componentIdx];
+    if (component.type === ComponentType.CHAT) {
       const chatComponent = component as ChatComponentItf;
       chatComponent.lines = [...chatComponent.lines, data.toString()];
       const newComponent = { ...component };
-      const newComponents = { ...layout.components };
-      newComponents[componentId] = newComponent;
-      const newLayout = { ...layout, components: newComponents };
-      setLayout(newLayout);
+      const newComponents = components.splice(componentIdx, 1, newComponent);
+      setComponents([...newComponents]);
     }
   };
 
-  const onLayoutUpdate = (newLayout: LayoutItf) => {
-    setLayout(newLayout);
+  const onComponentsSet = (components: ComponentItf[]) => {
+    setComponents(components);
   };
 
   const url = `ws://localhost:8000/games/${gameId}`;
@@ -42,9 +48,9 @@ const Game = ({ gameId }: GameProps) => {
   });
 
   const sendComponentUpdate = (componentId: string, data: any) => {
-    const componentUpdate: ComponentUpdateItf = {
+    const componentUpdate: UpdateComponentUpdateItf = {
       destination: UpdateDestination.SERVER,
-      type: UpdateType.COMPONENT,
+      type: UpdateType.UPDATE_COMPONENT,
       componentId,
       data,
     };
@@ -57,14 +63,14 @@ const Game = ({ gameId }: GameProps) => {
       const jsonString = JSON.parse(lastMessage);
       const parsedJson = JSON.parse(jsonString);
       switch (parsedJson.type) {
-        case UpdateType.LAYOUT:
-          const { layout } = camelize<LayoutUpdateItf>(parsedJson);
-          console.log(`Layout: ${JSON.stringify(layout)}`);
-          onLayoutUpdate(layout);
+        case UpdateType.SET_COMPONENTS:
+          const { components } = camelize<SetComponentsUpdateItf>(parsedJson);
+          console.log(`Components: ${JSON.stringify(components)}`);
+          onComponentsSet(components);
           break;
-        case UpdateType.COMPONENT:
+        case UpdateType.UPDATE_COMPONENT:
           const { componentId, data } =
-            camelize<ComponentUpdateItf>(parsedJson);
+            camelize<UpdateComponentUpdateItf>(parsedJson);
           onComponentUpdate(componentId, data);
           break;
         default:
@@ -78,7 +84,7 @@ const Game = ({ gameId }: GameProps) => {
 
   return (
     <div>
-      {Object.values(layout.components).map((component) => {
+      {components.map((component) => {
         const chatComponent = component as ChatComponentItf;
         return (
           <Chat

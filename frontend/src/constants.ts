@@ -1,6 +1,6 @@
 export enum UpdateType {
-  LAYOUT = "layout",
-  COMPONENT = "component",
+  SET_COMPONENTS = "setcomponents",
+  UPDATE_COMPONENT = "updatecomponent",
 }
 
 export enum ComponentType {
