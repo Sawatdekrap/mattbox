@@ -19,11 +19,33 @@ export interface UpdateItf {
   type: UpdateType;
 }
 
-export interface UpdateComponentUpdateItf extends UpdateItf {
-  componentId: string;
-  data: any;
+export interface ComponentUpdateItf {
+  type: string;
 }
 
-export interface SetComponentsUpdateItf extends UpdateItf {
+export interface ChatUpdateItf extends ComponentUpdateItf {}
+
+export interface ChatNewLineItf extends ChatUpdateItf {
+  line: string;
+}
+
+export interface ChatSubmitLineItf extends ChatUpdateItf {
+  line: string;
+}
+
+export interface ComponentUpdateDetailsItf {
+  componentId: string;
+  componentUpdate: ComponentUpdateItf;
+}
+
+export interface UpdateComponentUpdateItf extends UpdateItf {
+  details: ComponentUpdateDetailsItf;
+}
+
+export interface SceneUpdateDetailsItf {
   components: ComponentItf[];
+}
+
+export interface SetSceneUpdateItf extends UpdateItf {
+  details: SceneUpdateDetailsItf;
 }

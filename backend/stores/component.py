@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List
 
-from models.component import Component
+from components import Component
 
 
 ComponentById = Dict[str, Component]

@@ -1,23 +1,34 @@
-from typing import Any, List
+from typing import List, Union
 
 from pydantic import BaseModel
 
 from constants.update import UpdateType, UpdateDestination
-from models.component import Component
+from components import Component, ComponentUpdate
 
 
-class Update(BaseModel):
-    destination: UpdateDestination
+class UpdateBase(BaseModel):
     type: UpdateType
+    destination: UpdateDestination
 
 
-class SetComponentsUpdate(Update):
-    destination = UpdateDestination.CLIENT
-    type = UpdateType.SET_COMPONENTS
+class SceneUpdateDetails(BaseModel):
     components: List[Component]
 
 
-class UpdateComponentUpdate(Update):
-    type = UpdateType.UPDATE_COMPONENT
+class SetSceneUpdate(UpdateBase):
+    type = UpdateType.SET_SCENE
+    destination = UpdateDestination.CLIENT
+    details: SceneUpdateDetails
+
+
+class ComponentUpdateDetails(BaseModel):
     component_id: str
-    data: Any
+    component_update: ComponentUpdate
+
+
+class UpdateComponentUpdate(UpdateBase):
+    type = UpdateType.UPDATE_COMPONENT
+    details: ComponentUpdateDetails
+
+
+Update = Union[SetSceneUpdate, UpdateComponentUpdate]

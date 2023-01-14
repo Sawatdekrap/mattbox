@@ -2,12 +2,20 @@ import React, { useState, useEffect } from "react";
 import camelize from "camelize-ts";
 
 import Chat from "../components/Chat";
-import { ComponentType, UpdateDestination, UpdateType } from "../constants";
+import {
+  ChatUpdateTypes,
+  ComponentType,
+  UpdateDestination,
+  UpdateType,
+} from "../constants";
 import {
   ChatComponentItf,
+  ChatNewLineItf,
   ComponentItf,
-  SetComponentsUpdateItf,
+  ComponentUpdateDetailsItf,
+  SetSceneUpdateItf,
   UpdateComponentUpdateItf,
+  ComponentUpdateItf,
 } from "../interfaces";
 import useWebsocket from "../useWebsocket";
 import { toSnakeKeys } from "../utilities";
@@ -19,7 +27,8 @@ interface GameProps {
 const Game = ({ gameId }: GameProps) => {
   const [components, setComponents] = useState<ComponentItf[]>([]);
 
-  const onComponentUpdate = (componentId: string, data: any) => {
+  const onComponentUpdate = (details: ComponentUpdateDetailsItf) => {
+    const { componentId, componentUpdate } = details;
     const componentIdx = components.findIndex((c) => c.id === componentId);
     if (componentIdx === -1) {
       console.error(
@@ -31,10 +40,23 @@ const Game = ({ gameId }: GameProps) => {
     const component = components[componentIdx];
     if (component.type === ComponentType.CHAT) {
       const chatComponent = component as ChatComponentItf;
-      chatComponent.lines = [...chatComponent.lines, data.toString()];
-      const newComponent = { ...component };
-      const newComponents = components.splice(componentIdx, 1, newComponent);
-      setComponents([...newComponents]);
+      switch (componentUpdate.type) {
+        case ChatUpdateTypes.NEW_LINE:
+          const newLineDetails = componentUpdate as ChatNewLineItf;
+          chatComponent.lines = [...chatComponent.lines, newLineDetails.line];
+          const newComponent = { ...component };
+          const newComponents = components.splice(
+            componentIdx,
+            1,
+            newComponent
+          );
+          setComponents([...newComponents]);
+          break;
+        default:
+          console.error(
+            `Unhandled component update type ${componentUpdate.type}`
+          );
+      }
     }
   };
 
@@ -47,14 +69,20 @@ const Game = ({ gameId }: GameProps) => {
     url,
   });
 
-  const sendComponentUpdate = (componentId: string, data: any) => {
-    const componentUpdate: UpdateComponentUpdateItf = {
+  const sendComponentUpdate = (
+    componentId: string,
+    componentUpdate: ComponentUpdateItf
+  ) => {
+    const componentUpdateDetails: ComponentUpdateDetailsItf = {
+      componentId,
+      componentUpdate,
+    };
+    const update: UpdateComponentUpdateItf = {
       destination: UpdateDestination.SERVER,
       type: UpdateType.UPDATE_COMPONENT,
-      componentId,
-      data,
+      details: componentUpdateDetails,
     };
-    const updateData = JSON.stringify(toSnakeKeys(componentUpdate));
+    const updateData = JSON.stringify(toSnakeKeys(update));
     sendMessage(updateData);
   };
 
@@ -63,15 +91,16 @@ const Game = ({ gameId }: GameProps) => {
       const jsonString = JSON.parse(lastMessage);
       const parsedJson = JSON.parse(jsonString);
       switch (parsedJson.type) {
-        case UpdateType.SET_COMPONENTS:
-          const { components } = camelize<SetComponentsUpdateItf>(parsedJson);
+        case UpdateType.SET_SCENE:
+          const {
+            details: { components },
+          } = camelize<SetSceneUpdateItf>(parsedJson);
           console.log(`Components: ${JSON.stringify(components)}`);
           onComponentsSet(components);
           break;
         case UpdateType.UPDATE_COMPONENT:
-          const { componentId, data } =
-            camelize<UpdateComponentUpdateItf>(parsedJson);
-          onComponentUpdate(componentId, data);
+          const { details } = camelize<UpdateComponentUpdateItf>(parsedJson);
+          onComponentUpdate(details);
           break;
         default:
           console.error(`Update type '${parsedJson.type}' unhandled`);
@@ -86,14 +115,14 @@ const Game = ({ gameId }: GameProps) => {
     <div>
       {components.map((component) => {
         const chatComponent = component as ChatComponentItf;
+        const onComponentUpdate = (componentUpdate: ComponentUpdateItf) =>
+          sendComponentUpdate(component.id, componentUpdate);
         return (
           <Chat
             key={chatComponent.id}
             id={chatComponent.id}
             lines={chatComponent.lines}
-            handleSubmission={(value) =>
-              sendComponentUpdate(chatComponent.id, value)
-            }
+            sendComponentUpdate={onComponentUpdate}
           />
         );
       })}

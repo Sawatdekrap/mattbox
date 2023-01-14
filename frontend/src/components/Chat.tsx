@@ -1,16 +1,22 @@
 import React, { useState } from "react";
+import { ChatUpdateTypes } from "../constants";
+import { ChatSubmitLineItf, ComponentUpdateItf } from "../interfaces";
 
 interface ChatProps {
   id: string;
   lines: string[];
-  handleSubmission: (value: string) => void;
+  sendComponentUpdate: (details: ComponentUpdateItf) => void;
 }
 
-const Chat = ({ id, lines, handleSubmission }: ChatProps) => {
+const Chat = ({ id, lines, sendComponentUpdate }: ChatProps) => {
   const [input, setInput] = useState("");
 
   const onSubmit = () => {
-    handleSubmission(input);
+    const updateDetails: ChatSubmitLineItf = {
+      type: ChatUpdateTypes.SUBMIT,
+      line: input,
+    };
+    sendComponentUpdate(updateDetails);
     setInput("");
   };
 

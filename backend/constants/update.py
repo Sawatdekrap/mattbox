@@ -7,5 +7,5 @@ class UpdateDestination(StrEnum):
 
 
 class UpdateType(StrEnum):
-    SET_COMPONENTS = "setcomponents"
+    SET_SCENE = "setscene"
     UPDATE_COMPONENT = "updatecomponent"

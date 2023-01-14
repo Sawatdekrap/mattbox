@@ -1,10 +1,9 @@
 from typing import Optional
 
 from constants.component import ComponentType
-from constants.update import UpdateDestination, UpdateType
 from models.player import Player
-from models.component import ChatComponent
-from models.update import SetComponentsUpdate
+from components.chat import ChatComponent
+from models.update import SetSceneUpdate, SceneUpdateDetails
 import stores.player as player_store
 import stores.update as update_store
 import stores.component as component_store
@@ -21,7 +20,8 @@ async def add_player_to_game(
     component_store.set_components_for_player(game_id, player.id, components)
 
     # TODO generic
-    set_components_update = SetComponentsUpdate(components=components)
+    scene_details = SceneUpdateDetails(components=components)
+    set_components_update = SetSceneUpdate(details=scene_details)
     await update_store.push_update_for_connection(
         game_id, connection_id, set_components_update
     )
